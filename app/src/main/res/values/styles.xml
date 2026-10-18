@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.FrioSeguro" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">#007C82</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#315D8D</item>
+        <item name="android:colorBackground">#F3F7F8</item>
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F3F7F8</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+</resources>

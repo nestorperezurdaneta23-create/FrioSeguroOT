@@ -1,0 +1,16 @@
+<resources>
+    <item name="username" type="id" />
+    <item name="password" type="id" />
+    <item name="login" type="id" />
+    <item name="signup" type="id" />
+    <item name="host_ip" type="id" />
+    <item name="pairing" type="id" />
+    <item name="start_host" type="id" />
+    <item name="connect" type="id" />
+    <item name="apply_command" type="id" />
+    <item name="temperature" type="id" />
+    <item name="nav_connection" type="id" />
+    <item name="nav_monitor" type="id" />
+    <item name="nav_control" type="id" />
+    <item name="nav_log" type="id" />
+</resources>
