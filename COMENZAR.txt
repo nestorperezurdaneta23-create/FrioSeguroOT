@@ -1,0 +1,31 @@
+FRIOSEGURO OT  |  TI3042 UNIDAD 2
+Néstor Urdaneta
+
+1. Para instalar la app, usa apk/FrioSeguroOT.apk en dos teléfonos Android.
+   Necesitas Android 8 o posterior. Crea una cuenta local en cada teléfono.
+
+2. Conecta los teléfonos a la misma red Wi-Fi. En uno elige Equipo e inicia.
+   En el otro elige Operador y copia la IP y el código del Equipo.
+   Mantén ambas aplicaciones abiertas. No necesitas Internet.
+
+3. En Monitoreo verás datos enviados desde el otro teléfono. Desde Activador
+   envía una orden, confírmala y verifica el cambio en el Equipo.
+
+4. Lee docs/Informe_FrioSeguro_OT.docx y docs/PRUEBAS_DISPOSITIVOS.md.
+   Completa evidencias/Registro_pruebas_wifi.csv con tus pruebas reales.
+   Exporta las bitácoras desde Registro antes de cerrar la app.
+
+5. Abre esta carpeta en Android Studio para ver y modificar el código.
+   La carpeta correcta contiene settings.gradle.kts. Lee README.md.
+
+6. El repositorio público del proyecto es:
+   https://github.com/nestorperezurdaneta23-create/FrioSeguroOT
+   Sube Entrega_TI3042_Nestor_Urdaneta.txt al AAI y pulsa Enviar tarea.
+   El archivo de texto ya contiene el enlace real exigido por la guía.
+
+Antes de entregar: validar el tema y diseño con el docente; demostrar
+la conexión en dos teléfonos; completar mediciones de estabilidad;
+revisar acceso al repositorio; subir el .txt al AAI y pulsar Enviar tarea.
+
+Los sensores y el actuador son simulados. Los umbrales son didácticos.
+El APK está firmado para demostración y desarrollo.
