@@ -1,0 +1,23 @@
+INSTRUMENTATION_STATUS: class=cl.nestor.frioseguro.UiIntegrationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+cl.nestor.frioseguro.UiIntegrationTest:
+INSTRUMENTATION_STATUS: test=loginMonitoringConfirmedCommandAndFallback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=cl.nestor.frioseguro.UiIntegrationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=loginMonitoringConfirmedCommandAndFallback
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 111.574
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1

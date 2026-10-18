@@ -1,0 +1,1 @@
+Ejecutado en un emulador Android API 28. No es prueba inalámbrica en dos teléfonos físicos.

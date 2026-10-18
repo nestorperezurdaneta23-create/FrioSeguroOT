@@ -1,0 +1,41 @@
+INSTRUMENTATION_STATUS: class=cl.nestor.frioseguro.UiIntegrationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+cl.nestor.frioseguro.UiIntegrationTest:
+INSTRUMENTATION_STATUS: test=loginMonitoringConfirmedCommandAndFallback
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=cl.nestor.frioseguro.UiIntegrationTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Timeout: foco de ventana
+	at org.junit.Assert.fail(Assert.java:89)
+	at cl.nestor.frioseguro.UiIntegrationTest.await(UiIntegrationTest.kt:27)
+	at cl.nestor.frioseguro.UiIntegrationTest.loginMonitoringConfirmedCommandAndFallback(UiIntegrationTest.kt:54)
+
+INSTRUMENTATION_STATUS: stream=
+Error in loginMonitoringConfirmedCommandAndFallback(cl.nestor.frioseguro.UiIntegrationTest):
+java.lang.AssertionError: Timeout: foco de ventana
+	at org.junit.Assert.fail(Assert.java:89)
+	at cl.nestor.frioseguro.UiIntegrationTest.await(UiIntegrationTest.kt:27)
+	at cl.nestor.frioseguro.UiIntegrationTest.loginMonitoringConfirmedCommandAndFallback(UiIntegrationTest.kt:54)
+
+INSTRUMENTATION_STATUS: test=loginMonitoringConfirmedCommandAndFallback
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 66.204
+There was 1 failure:
+1) loginMonitoringConfirmedCommandAndFallback(cl.nestor.frioseguro.UiIntegrationTest)
+java.lang.AssertionError: Timeout: foco de ventana
+	at org.junit.Assert.fail(Assert.java:89)
+	at cl.nestor.frioseguro.UiIntegrationTest.await(UiIntegrationTest.kt:27)
+	at cl.nestor.frioseguro.UiIntegrationTest.loginMonitoringConfirmedCommandAndFallback(UiIntegrationTest.kt:54)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
