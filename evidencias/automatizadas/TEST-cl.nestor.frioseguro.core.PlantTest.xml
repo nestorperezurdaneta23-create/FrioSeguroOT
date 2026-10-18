@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="cl.nestor.frioseguro.core.PlantTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-14T03:43:44" hostname="26f90f4cb83d" time="0.031">
+  <properties/>
+  <testcase name="autoUsesHysteresis" classname="cl.nestor.frioseguro.core.PlantTest" time="0.002"/>
+  <testcase name="manualCommandChangesActuator" classname="cl.nestor.frioseguro.core.PlantTest" time="0.0"/>
+  <testcase name="closedDoorAutoStaysWithinDemoBand" classname="cl.nestor.frioseguro.core.PlantTest" time="0.002"/>
+  <testcase name="openDoorRaisesAlarm" classname="cl.nestor.frioseguro.core.PlantTest" time="0.0"/>
+  <testcase name="highAndLowTemperatureRaiseAlarm" classname="cl.nestor.frioseguro.core.PlantTest" time="0.0"/>
+  <testcase name="invalidCommandsHaveNoEffect" classname="cl.nestor.frioseguro.core.PlantTest" time="0.024"/>
+  <testcase name="unauthorizedCommandHasNoEffect" classname="cl.nestor.frioseguro.core.PlantTest" time="0.001"/>
+  <testcase name="fallbackRestoresLocalControl" classname="cl.nestor.frioseguro.core.PlantTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
