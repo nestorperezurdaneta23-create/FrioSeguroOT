@@ -1,0 +1,19 @@
+Integración en un emulador Android API 28; dos modelos de app en el mismo dispositivo virtual.
+Login y navegación mediante eventos programáticos de vistas Android; imágenes renderizadas de las vistas. No acredita gestos físicos ni dos teléfonos.
+Login correcto; telemetría recibida; alarma propagada; orden MANUAL confirmada.
+FríoSeguro OT | 2026-10-14 01:42:16
+Modo: Operador
+Conectado · control autorizado
+Latencia RTT: 262 ms
+Muestras: 25 · Saltos observados: 0
+Intervalo recibido: 1005 ms
+Órdenes: 1 · Confirmadas: 1
+Tráfico cifrado: TX 1647 B · RX 5804 B
+Sesión: 26 s
+
+Eventos recientes (máximo 200; sin contraseñas ni códigos)
+01:41:37 | Inicio de sesión local correcto
+01:41:49 | Conectando · intento 1 de 5
+01:41:49 | Sesión autenticada; permiso CONTROL
+01:42:11 | Orden enviada: MANUAL a 4.5 °C
+01:42:11 | Orden confirmada por el equipo
