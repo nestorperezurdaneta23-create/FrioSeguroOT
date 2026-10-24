@@ -1,41 +1,57 @@
-# Diseño de FríoSeguro OT
+# Diseño de FríoSeguro OT para la evaluación sumativa
 
 ## Problema y objetivo
 
-Un encargado que no está junto a una cámara de refrigeración carece de visibilidad inmediata sobre temperatura, puerta y estado del compresor. El prototipo comunica un equipo simulado con un operador para mostrar condiciones, detectar eventos y confirmar cambios de control.
+El encargado de una cámara de refrigeración puede carecer de visibilidad sobre temperatura, puerta y compresor al encontrarse en otra zona. El proyecto conecta un Equipo simulado con un Operador Android para observar condiciones, alertar, confirmar cambios de control y consultar después las lecturas guardadas.
 
-La simulación se realiza en un segundo teléfono Android, como pide la guía; no se inventa una lectura de un sensor físico. El operador recibe valores producidos por el otro teléfono y envía órdenes que este valida y aplica. Los límites de 2 a 6 °C para la consigna y la alarma por encima de 8 °C o por debajo de 0 °C son parámetros didácticos.
+Los sensores y el actuador se simulan en el teléfono B; el teléfono A recibe sus datos. Los límites de consigna de 2 a 6 °C y las alarmas por encima de 8 °C, por debajo de 0 °C o por puerta abierta son didácticos. El sistema no se conecta a un refrigerador o PLC real.
 
-## Herramientas y conectividad
+## Herramientas
 
-Android Studio y Kotlin son las herramientas exigidas. AndroidX AppCompat, ViewModel, LiveData y componentes Material separan la vista de las tareas de red y mantienen estado ante recreación de Activity. El módulo core permite probar criptografía y simulación en la JVM. La conexión usa Socket y ServerSocket en hilos de trabajo; la UI no ejecuta recepción de red.
+Android Studio y Kotlin son los exigidos por la guía. AppCompat y componentes Material construyen vistas nativas; ViewModel/LiveData separan la UI del estado; los ejecutores atienden red, cifrado, autenticación y consultas. SQLiteOpenHelper proporciona almacenamiento relacional local. SSLSocket y SSLServerSocket habilitan TLS y Android Keystore protege claves AES y la identidad RSA del Equipo.
 
-Se elige Wi-Fi local por su disponibilidad en ambos teléfonos, su alcance útil para una sala y la posibilidad de mostrar una red local sin Internet. Bluetooth sería útil a corta distancia, pero la guía permite elegir uno de los medios y no exige implementar ambos. No se realiza escaneo de redes, descubrimiento, conexión automática al Wi-Fi ni lectura de SSID; el usuario configura la red y copia la IP.
+La combinación de Kotlin 2.1.10, AGP 8.9.2, Gradle 8.11.1, JDK 17 y SDK 35 está fijada. Se usa SQLite directamente por el tamaño acotado del esquema y para hacer visible el SQL de la actividad. Android recomienda Room como abstracción para modelos más amplios. Las consultas actuales usan parámetros y pruebas explícitas. Ver `DATOS_SQLITE.md` para la comparación con Firebase y API/MySQL, el esquema y el contrato interoperable.
 
-El manifiesto declara INTERNET, ACCESS_NETWORK_STATE y ACCESS_WIFI_STATE. Con target SDK 35, los sockets LAN no requieren pedir Bluetooth, GPS ni permisos de escaneo Wi-Fi. Al migrar a target SDK 37 se deberá revisar el nuevo permiso de red local, de acuerdo con la documentación Android. El proyecto no simula un permiso que no usa.
+## Elección de Wi-Fi
 
-## Pantallas
+| Aspecto | Decisión y efecto |
+| --- | --- |
+| Distancia | Wi-Fi permite la demostración dentro de una sala y el ensayo con una pared; el alcance real depende del router y debe medirse |
+| Energía | Dos apps en primer plano con una muestra y un ping por segundo consumen más que un sensor BLE dormido; es una elección didáctica para teléfonos, no una promesa de autonomía |
+| Estabilidad | TCP entrega en orden y retransmite; TLS autentica y cifra; la app detecta datos vencidos, limita colas y exige reconexión después de una pérdida |
+| Infraestructura | Red local sin Internet, con router o hotspot de un tercer teléfono y sin aislamiento de clientes |
 
-1. **Login**: creación inicial y acceso local mediante usuario y contraseña; secretos ocultos y validación.
-2. **Conexión**: rol Equipo u Operador, IP, código, permiso remoto y estado. El rol y el permiso se fijan antes de iniciar una ejecución.
-3. **Monitoreo**: temperatura, consigna, modo, compresor, puerta, alarma, tendencia de 60 muestras y calidad del enlace. En el Equipo agrega escenarios de simulación.
-4. **Activador**: radio buttons AUTO y MANUAL, slider de consigna, switch de compresor y botón con confirmación. Se bloquea sin datos actuales, conexión o permiso.
-5. **Registro**: RTT, tráfico cifrado, muestras, órdenes, confirmaciones y exportación de eventos.
+Bluetooth resulta apropiado para dispositivos cercanos de bajo consumo; MQTT es un protocolo de mensajería que requiere definir un broker y un transporte. Para este prototipo se selecciona Wi-Fi con TLS sobre TCP, sin un servicio externo que condicione la demostración.
 
-La navegación inferior presenta las cuatro pantallas tras el login. Se usan textos y estados junto con el color; las alertas no se comunican únicamente mediante color. Los campos tienen etiquetas, botones accesibles, controles de 48 dp y contenedores desplazables. El teclado no cubre los campos de conexión. Las vistas sensibles inhiben capturas; para acreditar el login se puede tomar una foto externa sin mostrar secretos.
+El usuario configura la Wi-Fi y copia una IPv4 privada. El manifiesto declara INTERNET y acceso al estado de red/Wi-Fi; no hay escaneo de redes ni lectura de ubicación. Las restricciones de red local deben revisarse si se cambia el target SDK fijado.
+
+## Pantallas y navegación
+
+1. Login: creación inicial y validación de credenciales SQLite, con secretos ocultos y bloqueo por intentos.
+2. Conexión: Equipo u Operador, IP, código FS2, permiso remoto y estado TLS. La identidad se prepara fuera de la UI.
+3. Monitoreo: temperatura, puerta, compresor, alarma, consigna, tendencia y métricas. El Equipo permite provocar escenarios.
+4. Activador: AUTO/MANUAL, slider, switch y confirmación; bloqueado sin enlace reciente o permiso.
+5. Registro: métricas, errores de persistencia y exportación de eventos de la ejecución.
+6. Historial: filtros SQLite de origen, periodo y alarma, consulta sin conexión y exportación CSV.
+
+Después del login, cinco destinos se muestran en la navegación inferior. Hay etiquetas, controles de 48 dp, contenedores desplazables y estados expresados con texto y color. Login y Conexión inhiben capturas de secretos. Las evidencias de vistas Android no deben confundirse con fotografías de dos teléfonos.
 
 ![Bosquejos de pantallas](figuras/Mockup_pantallas.png)
 
-## Arquitectura y datos
+## Comunicación, datos y control
 
-El Equipo produce una muestra por segundo y mantiene el control AUTO local. El Operador envía un ping cada segundo para medir RTT, recibe telemetría y envía una orden a la vez. El Equipo responde con ACK y el estado aplicado o una causa de rechazo. La recepción expira a los 7 segundos sin mensajes. Después de una pérdida de sesión, se requiere reconexión del Operador; solo los intentos iniciales de conexión tienen reintentos acotados.
+El Equipo abre TLS en el puerto 8842 y comparte un código FS2 con PSK de 128 bits y huella SHA256 de su certificado. El Operador valida exactamente esa identidad y la vigencia del certificado antes de autenticar la PSK. Se permiten TLS 1.2 o 1.3 y suites AEAD con intercambio efímero. No existe una ruta de conexión sin TLS. Las cuentas locales no se transmiten.
 
-Tipos de mensajes dentro del canal cifrado: telemetry, command, ack, ping y pong. Las órdenes incluyen UUID y timestamp; se validan el permiso, la vigencia de 60 segundos, duplicados recientes, frecuencia máxima de cinco órdenes por segundo, modo y valores finitos dentro del rango. La app limita a una orden pendiente y deja de esperarla tras 4 segundos sin ACK; no asume que una orden sin ACK no se aplicó.
+El Equipo captura y guarda cada segundo. El Operador recibe y guarda telemetría con `schemaVersion=2` y fecha de captura; envía un ping por segundo para RTT. El modelo marca datos vencidos tras 3 s; la lectura del socket expira a 7 s. Los intentos iniciales tienen reintentos acotados; una sesión perdida requiere reconexión manual.
 
-El Equipo usa histéresis de 0.5 °C: enciende el compresor por encima de consigna más 0.5 y lo apaga por debajo de consigna menos 0.5. En MANUAL se conserva la orden explícita. Al perder la sesión vuelve a AUTO con consigna 4 °C. Cada dirección cifrada usa su contador y sus claves.
+Las órdenes incluyen UUID y timestamp. El Equipo verifica permiso, vigencia de 60 s, duplicados, frecuencia, modo y valores finitos. La UI admite una orden pendiente y espera ACK durante 4 s. No la reenvía automáticamente porque una orden sin confirmación podría haberse aplicado.
 
-![Arquitectura y respuesta ante pérdida de enlace](figuras/Arquitectura.png)
+AUTO usa histéresis de 0.5 °C. Al perder el enlace, el Equipo retorna a AUTO con consigna 4 °C mientras siga iniciado en primer plano. Cerrar la app detiene la simulación; no hay controlador físico que continúe fuera del proceso Android.
 
-## Validación del docente
+![Historial y Registro](figuras/Mockup_historial.png)
 
-Presentar problemática, roles, elección de Wi-Fi, bosquejos y límites. Solicitar al docente que confirme la pertinencia para TI3042 Unidad 2 y registre las observaciones. Las reuniones y la aprobación no se presuponen. Si ya existe un tema de Unidad 1, el docente debe confirmar que este tema nuevo sea compatible con la continuidad de la asignatura.
+![Arquitectura](figuras/Arquitectura.png)
+
+## Validación docente
+
+Presentar problemática, continuidad con Unidad 1, elección de Wi-Fi, bosquejos, autenticación SQLite, esquema y medidas de seguridad. Registrar las observaciones reales del docente. La aprobación del diseño y la demostración presencial no se presuponen.
