@@ -21,7 +21,7 @@ import javax.net.ssl.X509TrustManager
 import javax.security.auth.x500.X500Principal
 
 internal object TlsTransport {
-    private const val ALIAS = "frioseguro.tls.v2"
+    internal const val ALIAS = "frioseguro.tls.v3"
     private val keyLock = Any()
     data class Identity(val context: SSLContext, val fingerprint: ByteArray)
     fun server(): Identity = synchronized(keyLock) {
@@ -32,7 +32,8 @@ internal object TlsTransport {
             val now = System.currentTimeMillis()
             KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore").run {
                 initialize(KeyGenParameterSpec.Builder(ALIAS, KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY)
-                    .setKeySize(2048).setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                    // Conscrypt calcula el digest de TLS antes de solicitar la firma al Keystore.
+                    .setKeySize(2048).setDigests(KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384, KeyProperties.DIGEST_SHA512)
                     .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1, KeyProperties.SIGNATURE_PADDING_RSA_PSS)
                     .setCertificateSubject(X500Principal("CN=FrioSeguroOT"))
                     .setCertificateSerialNumber(BigInteger(128, SecureRandom()).add(BigInteger.ONE))
