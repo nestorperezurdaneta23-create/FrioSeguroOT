@@ -43,8 +43,10 @@ class UiIntegrationTest {
         instrumentation.uiAutomation.executeShellCommand("input keyevent 224").close()
         instrumentation.uiAutomation.executeShellCommand("wm dismiss-keyguard").close()
         context.getSharedPreferences("auth_private",0).edit().clear().commit()
+        LocalDatabase.resetForTests(context)
         AuthStore(context).create("evaluacion","EvaluacionLocal2026".toCharArray())
         val host=AppModel(context.applicationContext as Application)
+        host.user="evaluacion"
         var operator: AppModel? = null
         try {
             host.startHost(true)
@@ -90,6 +92,21 @@ class UiIntegrationTest {
                 assertEquals("MANUAL",host.snapshot.mode); assertTrue(host.snapshot.compressor)
                 scenario.onActivity { activity -> assertTrue(activity.findViewById<android.view.View>(R.id.nav_log).performClick()) }
                 screenshot(scenario,"04_registro_emulador")
+                await("SQLite guarda lecturas") { operator!!.savedRecords>=3 }
+                scenario.onActivity { activity -> assertTrue(activity.findViewById<android.view.View>(R.id.nav_history).performClick()) }
+                await("consulta SQLite en pantalla") {
+                    var done=false
+                    scenario.onActivity { done=it.findViewById<android.widget.TextView>(R.id.history_summary)?.text?.contains("coincidencias")==true }
+                    done
+                }
+                screenshot(scenario,"05_historial_filtros")
+                val persisted=operator!!.history.query(HistoryFilter(source="REMOTO"))
+                assertTrue(persisted.matching>=3);assertTrue(operator!!.connection.contains("TLSv1."))
+                scenario.onActivity { activity ->
+                    val summary=activity.findViewById<android.widget.TextView>(R.id.history_summary)
+                    summary.requestRectangleOnScreen(android.graphics.Rect(0,0,summary.width,summary.height+400),true)
+                }
+                screenshot(scenario,"06_historial_sqlite")
                 File(context.getExternalFilesDir(null),"qa/resultados_integracion.txt").writeText(
                     "Integración en un emulador Android API ${android.os.Build.VERSION.SDK_INT}; dos modelos de app en el mismo dispositivo virtual.\n"+
                     "Login y navegación mediante eventos programáticos de vistas Android; imágenes renderizadas de las vistas. No acredita gestos físicos ni dos teléfonos.\n"+
@@ -98,6 +115,6 @@ class UiIntegrationTest {
                 await("fallback") { host.snapshot.mode=="AUTO" }
                 assertEquals(4.0,host.snapshot.setpoint,0.001)
             }
-        } finally { operator?.stop(); host.stop() }
+        } finally { operator?.dispose(); host.dispose() }
     }
 }
