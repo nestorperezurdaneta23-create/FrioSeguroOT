@@ -1,32 +1,42 @@
 # FríoSeguro OT
 
-Prototipo Android para monitorear y controlar una cámara de refrigeración simulada mediante dos teléfonos conectados a una red Wi-Fi local. Proyecto de Néstor Urdaneta para TI3042, Unidad 2.
+Aplicación Android en Kotlin para monitorear y controlar una cámara de refrigeración simulada desde dos teléfonos conectados por Wi-Fi. Proyecto individual de Néstor Urdaneta para TI3042, Unidad 2, evaluación sumativa.
 
-Una instalación actúa como **Equipo**: simula temperatura, puerta y compresor. La otra actúa como **Operador**: recibe telemetría, visualiza alarmas y envía órdenes con confirmación. El tráfico de aplicación se cifra y autentica. No se necesita un servicio de Internet.
+**Versión 1.1, actualizada el 24 de octubre de 2026.** Incluye autenticación SQLite, historial persistente y consultable, exportación CSV y transporte TLS con identidad del Equipo verificada. El repositorio público es [https://github.com/nestorperezurdaneta23-create/FrioSeguroOT](https://github.com/nestorperezurdaneta23-create/FrioSeguroOT).
 
-## Inicio rápido en dos teléfonos
+El teléfono **Equipo** produce temperatura, puerta y estado del compresor. El teléfono **Operador** recibe datos, muestra alertas y envía órdenes con ACK. Los sensores y el actuador son simulados. Los rangos son didácticos.
 
-1. Instala el mismo APK en dos dispositivos con Android 8 o posterior. Es un APK de demostración firmado para desarrollo; no es una distribución de producción.
-2. Conecta los teléfonos a la misma red Wi-Fi, sin aislamiento entre clientes. También puedes usar el hotspot de un tercer teléfono. Activa la hora automática en ambos.
-3. Abre la app en cada uno y crea una cuenta local. Usa un usuario de 3 a 32 caracteres y una contraseña de al menos 12 caracteres, con letras y números. No hay credenciales predeterminadas.
-4. Inicia sesión. En el teléfono B selecciona **Equipo**, configura **Permitir control remoto** y pulsa **Iniciar equipo**.
-5. Copia la IP local que muestra B. Revela su código con el icono del ojo. Transcribe los 32 caracteres en A, que debe estar en modo **Operador**, y pulsa **Conectar**. El código también acepta espacios o guiones como separadores.
-6. En A abre **Monitoreo**. Debes ver una muestra nueva aproximadamente cada segundo. En B abre Monitoreo y pulsa **Simular temperatura alta** o activa **Puerta abierta**. Comprueba que A recibe la alerta.
-7. En A abre **Activador**: selecciona AUTO o MANUAL, ajusta el slider y el switch, pulsa **Enviar orden** y confirma. Verifica el mensaje de confirmación y el cambio en B.
-8. Prueba la pérdida de Wi-Fi y el permiso de solo monitoreo. Exporta la bitácora desde **Registro**, antes de cerrar o reiniciar la app.
+## Instalar y conectar dos teléfonos
 
-Mantén la app en primer plano en ambos teléfonos. Al pasar a segundo plano, el enlace se cierra; esto es deliberado. Al detener e iniciar B se genera un código nuevo. Para reconectar A debes ingresar el código vigente. Si B sigue esperando con la misma ejecución, el código no cambia.
+1. Instala `apk/FrioSeguroOT.apk` en ambos teléfonos con Android 8 o posterior. Ambos deben usar la versión 1.1.
+2. Si Android indica un conflicto de firma con una instalación anterior de demostración, exporta primero las evidencias de esa app y desinstálala antes de instalar esta. Desinstalar elimina sus datos locales. La migración de la cuenta 1.0 a SQLite funciona cuando Android permite actualizar conservando la misma firma y datos.
+3. Conecta ambos teléfonos a la misma Wi-Fi WPA2/WPA3, sin aislamiento entre clientes. También sirve un hotspot de un tercer teléfono. Activa fecha y hora automáticas.
+4. Crea una cuenta local en cada dispositivo. Usuario de 3 a 32 caracteres; contraseña de 12 a 128 caracteres, con letras y números. No hay credenciales predeterminadas. Inicia sesión.
+5. En B selecciona **Equipo**, configura **Permitir control remoto** y pulsa **Iniciar equipo**. Espera el estado **Equipo listo · TLS obligatorio**.
+6. Copia su IP privada. Usa **Copiar código privado** o revela el campo para transferir el **código FS2 completo**, por un medio de confianza, al teléfono A. No lo publiques. El código incluye un secreto de 128 bits y la huella SHA256 del certificado de B.
+7. En A selecciona **Operador**, ingresa IP y código y pulsa **Conectar**. La app verifica TLS y autentica el emparejamiento. El estado muestra la versión TLS negociada.
+8. Abre **Monitoreo**. En B simula temperatura alta o puerta abierta y comprueba la alerta recibida en A. Desde **Activador**, envía una orden, confirma y revisa su ACK y el cambio en B.
 
-## Abrir y compilar en Android Studio
+No se necesita Internet. Mantén ambas apps en primer plano. Pasar a segundo plano cierra el enlace; cinco minutos sin interacción cierran la sesión local. Un nuevo inicio del Equipo genera otro código. Tras perder una sesión, el Operador reconecta de forma explícita y no se reenvían órdenes automáticamente.
 
-- Abre la carpeta que contiene `settings.gradle.kts`; no solo la carpeta `app`.
-- JDK 17, Android SDK Platform 35 y Build Tools 35.0.0.
-- Android Gradle Plugin 8.9.2, Gradle 8.11.1, Kotlin 2.1.10. Las versiones están fijadas.
-- Android Studio Meerkat o una versión compatible con AGP 8.9.
-- Espera la sincronización de Gradle. Android Studio generará `local.properties` con tu ruta del SDK.
-- Ejecuta la app en ambos teléfonos o usa **Build > Build App Bundle(s) / APK(s) > Build APK(s)**.
+## Guardar y consultar datos
 
-Linux o macOS:
+El Equipo guarda una lectura LOCAL por ciclo. El Operador guarda cada telemetría REMOTA aceptada. SQLite conserva las últimas **10.000 lecturas por instalación**, con fecha de captura, fecha de recepción, origen, alarma y un payload cifrado.
+
+En **Historial** puedes consultar todos los orígenes o seleccionar Locales/Remotos, limitar a los últimos 15 minutos o a Hoy y mostrar solo alarmas. La pantalla presenta las 50 coincidencias más recientes y actualiza la consulta cada cinco segundos mientras permanece abierta. Funciona después de reiniciar y sin conectividad.
+
+**Exportar consulta a CSV** incluye todas las coincidencias conservadas, hasta 10.000, con fechas UTC ISO 8601, grados Celsius y columnas estables. El archivo se guarda en la ubicación que elijas. La base privada y los secretos no se exportan. El selector de archivos puede pasar la app a segundo plano y cerrar el enlace; conserva primero las evidencias de esa sesión.
+
+La bitácora de **Registro** guarda los últimos 200 eventos de la ejecución y se exporta aparte. El historial de sensores sí persiste en SQLite. Los contadores de órdenes son acumulativos de esta ejecución; las muestras y bytes corresponden al enlace actual. Los bytes indicados son tramas de aplicación y excluyen el overhead TLS/TCP/IP.
+
+## Herramientas y compilación
+
+- Android Studio compatible con AGP 8.9; JDK 17; Android SDK Platform 35 y Build Tools 35.0.0.
+- Kotlin 2.1.10, AGP 8.9.2 y Gradle 8.11.1, con versiones y checksum del wrapper fijados.
+- UI nativa Material Components, ViewModel y LiveData; SQLiteOpenHelper de Android; SSLSocket/SSLServerSocket y Android Keystore.
+- Abre la carpeta que contiene `settings.gradle.kts`. Android Studio creará `local.properties` con la ruta del SDK.
+
+Linux/macOS:
 
 ```bash
 chmod +x gradlew
@@ -39,40 +49,38 @@ Windows PowerShell:
 .\gradlew.bat :app:assembleDebug :core:test :app:lintDebug
 ```
 
-El APK se genera en `app/build/outputs/apk/debug/app-debug.apk`. Las pruebas de credenciales con Android Keystore se ejecutan en un dispositivo de prueba con `./gradlew :app:connectedDebugAndroidTest`. Estas pruebas borran la cuenta local del dispositivo de prueba antes de ejecutarse.
+El APK compilado queda en `app/build/outputs/apk/debug/app-debug.apk`. El adjunto está firmado para desarrollo. Revisa `apk/SHA256.txt` para verificar el archivo distribuido.
 
-## Qué contiene el proyecto
+Las pruebas Android deben ejecutarse en un dispositivo de prueba: borran su cuenta y base local. Para la batería principal:
 
-| Ruta | Contenido |
+```bash
+./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=cl.nestor.frioseguro.AccountSecurityTest,cl.nestor.frioseguro.HistoryStorageTest,cl.nestor.frioseguro.TlsTransportTest,cl.nestor.frioseguro.UiIntegrationTest
+```
+
+La prueba de persistencia entre procesos se ejecuta con `RestartPersistenceTest#seed`, una detención del proceso y luego `RestartPersistenceTest#verify` en otra instrumentación. El alcance y los resultados obtenidos se registran en `evidencias/automatizadas/VERIFICACION.md`.
+
+## Estructura
+
+| Ruta | Función |
 | --- | --- |
-| `app/src/main/java/.../MainActivity.kt` | Login y pantallas Material de Conexión, Monitoreo, Activador y Registro |
-| `app/src/main/java/.../AuthStore.kt` | Cuenta local, hash PBKDF2 y almacenamiento cifrado con Android Keystore |
-| `app/src/main/java/.../WifiLink.kt` | Conexión TCP local, límites y cierre de sesión |
-| `app/src/main/java/.../AppModel.kt` | Telemetría, validación de órdenes, métricas y bitácora |
-| `core/src/main/kotlin/.../SecureChannel.kt` | Autenticación de pares y tramas AES GCM con anti repetición |
-| `core/src/main/kotlin/.../Plant.kt` | Simulación y control local con histéresis |
-| `core/src/test` | Pruebas de control, cifrado y sockets locales |
-| `app/src/androidTest` | Pruebas de cuenta y Keystore en Android |
-| `docs` | Informe, diseño, seguridad, pauta y protocolo de pruebas |
-| `evidencias` | Resultados automatizados y formulario para pruebas Wi-Fi reales |
-| `scripts/crear_entrega.py` | Genera el bloc de notas exigido a partir del enlace real de GitHub |
+| `app/.../MainActivity.kt` | Login, Conexión, Monitoreo, Activador, Registro e Historial |
+| `app/.../AuthStore.kt` | Autenticación SQLite, migración 1.0, PBKDF2 y bloqueo |
+| `app/.../LocalDatabase.kt` y `HistoryStore.kt` | Esquema SQL, transacciones, filtros, retención y CSV |
+| `app/.../DeviceVault.kt` | Cifrado AES GCM con claves Android Keystore |
+| `app/.../TlsTransport.kt` y `WifiLink.kt` | TLS 1.2/1.3 y certificado verificado mediante el código FS2 |
+| `app/.../AppModel.kt` | Captura, persistencia asíncrona, telemetría, órdenes y métricas |
+| `core` | Simulación, protocolo PSK dentro de TLS, validación de identidad y pruebas JVM |
+| `docs` | Informe, diseño, seguridad, almacenamiento y protocolo de pruebas |
+| `evidencias` | Resultados verificables y registro pendiente de ensayos Wi-Fi físicos |
 
-## Entrega exigida por el Word
+## Entrega en AAI
 
-El archivo que se sube al AAI debe ser un **bloc de notas con el enlace a GitHub**. El ZIP y el APK son apoyos para preparar y demostrar el proyecto.
+Sube **`Entrega_TI3042_Nestor_Urdaneta.txt`**, incluido en la raíz. Contiene el enlace real al repositorio. Confirma con **Enviar tarea**. La nueva guía mantiene este formato de entrega.
 
-El proyecto está publicado en [https://github.com/nestorperezurdaneta23-create/FrioSeguroOT](https://github.com/nestorperezurdaneta23-create/FrioSeguroOT), con acceso público para la revisión docente.
+La demostración debe cubrir login SQLite, enlace entre ambos Android, almacenamiento, consulta después de reiniciar, CSV y controles de seguridad. Completa `docs/PRUEBAS_DISPOSITIVOS.md` y `evidencias/Registro_pruebas_wifi.csv` con mediciones reales. La validación del tema, diseño y autenticación por el docente debe obtenerse realmente, incluida la continuidad con Unidad 1 si corresponde.
 
-1. Descarga `Entrega_TI3042_Nestor_Urdaneta.txt`, incluido en la raíz del proyecto. Contiene el enlace real a este repositorio.
-2. Sube ese `.txt` al AAI y confirma con **Enviar tarea**. No basta con dejar la entrega como borrador.
-3. Instala `apk/FrioSeguroOT.apk` en dos teléfonos y completa `docs/PRUEBAS_DISPOSITIVOS.md`. Registra resultados reales en `evidencias/Registro_pruebas_wifi.csv` y guarda capturas y bitácoras sin secretos.
-4. Revisa `docs/Informe_FrioSeguro_OT.docx`, la matriz de la pauta y las evidencias automatizadas. Las pruebas de teléfonos físicos y la validación del docente siguen pendientes hasta ejecutarlas realmente.
+## Alcance de seguridad
 
-Para volver a generar el archivo de entrega: `python scripts/crear_entrega.py https://github.com/nestorperezurdaneta23-create/FrioSeguroOT`.
-No publiques `local.properties`, contraseñas, códigos de emparejamiento, claves de firma ni carpetas `build`.
+Las credenciales y los valores de sensores se cifran antes de guardarlos; SQLite conserva metadatos de hora, origen y alarma para consultar e indexar. TLS se valida con la huella entregada por el Equipo en el código FS2, sin aceptar certificados arbitrarios ni recurrir a TCP sin TLS. Encima de TLS se conserva la autenticación PSK y las tramas AES GCM del prototipo.
 
-Antes de la evaluación muestra el problema, la elección de Wi-Fi y el diseño al docente. La validación del docente y los resultados de dispositivos físicos deben obtenerse realmente; el proyecto no los da por realizados.
-
-## Alcance
-
-Las temperaturas, los umbrales y la dinámica son didácticos. El prototipo no incluye un sensor, PLC, refrigerador real, servicio en segundo plano ni certificación ISO. La documentación relaciona controles concretos con objetivos de ISO/IEC 27400 e ISO/IEC 27001; no declara certificación ni cumplimiento integral de las normas.
+La solución aplica objetivos de ISO/IEC 27400 e ISO/IEC 27001 y consideraciones OT. No declara certificación, no integra un PLC o refrigerador real y no sustituye controles de seguridad de una planta. Revisa `docs/SEGURIDAD.md`.
