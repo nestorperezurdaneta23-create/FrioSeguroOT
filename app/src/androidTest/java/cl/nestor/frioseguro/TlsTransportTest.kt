@@ -16,7 +16,7 @@ import javax.net.ssl.SSLSocket
 class TlsTransportTest {
     @Test fun androidKeystoreIdentityAndActualPinnedTls() {
         val identity=TlsTransport.server()
-        val key=KeyStore.getInstance("AndroidKeyStore").apply {load(null)}.getKey("frioseguro.tls.v2",null)
+        val key=KeyStore.getInstance("AndroidKeyStore").apply {load(null)}.getKey(TlsTransport.ALIAS,null)
         assertNull(key.encoded)
         val server=identity.context.serverSocketFactory.createServerSocket(0,1,InetAddress.getLoopbackAddress()) as SSLServerSocket
         TlsTransport.harden(server); server.soTimeout=7_000
@@ -28,8 +28,13 @@ class TlsTransportTest {
                     TlsTransport.harden(s);s.startHandshake();s.outputStream.write(42);s.outputStream.flush();s.inputStream.read()==43
                 } }
             }
-            (TlsTransport.client(identity.fingerprint).socketFactory.createSocket(InetAddress.getLoopbackAddress(),server.localPort) as SSLSocket).use { s ->
-                TlsTransport.harden(s);s.startHandshake();assertEquals(42,s.inputStream.read());s.outputStream.write(43);s.outputStream.flush()
+            try {
+                (TlsTransport.client(identity.fingerprint).socketFactory.createSocket(InetAddress.getLoopbackAddress(),server.localPort) as SSLSocket).use { s ->
+                    TlsTransport.harden(s);s.startHandshake();assertEquals(42,s.inputStream.read());s.outputStream.write(43);s.outputStream.flush()
+                }
+            } catch (error: Exception) {
+                runCatching { host.get(5,TimeUnit.SECONDS) }.exceptionOrNull()?.let(error::addSuppressed)
+                throw error
             }
             assertTrue(host.get(15,TimeUnit.SECONDS))
         } finally { server.close();worker.shutdownNow() }
@@ -42,9 +47,12 @@ class TlsTransportTest {
         try {
             val host=worker.submit<Boolean> { server.use { runCatching { (it.accept() as SSLSocket).use { s -> TlsTransport.harden(s);s.startHandshake() } }.isSuccess } }
             val wrong=identity.fingerprint.copyOf().also {it[0]=(it[0].toInt() xor 1).toByte()}
-            assertThrows(Exception::class.java) {
+            val rejection = assertThrows(Exception::class.java) {
                 (TlsTransport.client(wrong).socketFactory.createSocket(InetAddress.getLoopbackAddress(),server.localPort) as SSLSocket).use { s ->TlsTransport.harden(s);s.startHandshake() }
             }
+            assertTrue(generateSequence<Throwable>(rejection) { it.cause }.any {
+                it is java.security.cert.CertificateException && it.message?.contains("identidad TLS") == true
+            })
             assertFalse(host.get(15,TimeUnit.SECONDS))
         } finally { server.close();worker.shutdownNow() }
     }
