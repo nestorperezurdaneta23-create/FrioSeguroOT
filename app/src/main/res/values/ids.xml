@@ -13,4 +13,16 @@
     <item name="nav_monitor" type="id" />
     <item name="nav_control" type="id" />
     <item name="nav_log" type="id" />
+    <item name="nav_history" type="id" />
+    <item name="history_source_all" type="id" />
+    <item name="history_source_local" type="id" />
+    <item name="history_source_remote" type="id" />
+    <item name="history_time_all" type="id" />
+    <item name="history_time_15" type="id" />
+    <item name="history_time_today" type="id" />
+    <item name="history_alarm" type="id" />
+    <item name="history_refresh" type="id" />
+    <item name="history_export" type="id" />
+    <item name="history_summary" type="id" />
+    <item name="history_records" type="id" />
 </resources>
