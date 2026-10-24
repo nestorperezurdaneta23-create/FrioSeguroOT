@@ -1,6 +1,10 @@
 package cl.nestor.frioseguro
 
 import android.content.Intent
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -29,6 +33,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import java.net.NetworkInterface
 import java.util.Locale
+import java.util.Calendar
+import java.util.Date
+import java.text.SimpleDateFormat
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
@@ -50,9 +57,26 @@ class MainActivity : AppCompatActivity() {
     private var commandStatus: TextView? = null
     private var hostCode: TextInputEditText? = null
     private var hostStart: MaterialButton? = null
+    private var hostCopy: MaterialButton? = null
     private var roleGroup: RadioGroup? = null
     private var allowSwitch: SwitchMaterial? = null
     private var exportPending = ""
+    private var csvPending = ""
+    private var historySummary: TextView? = null
+    private var historyDetails: TextView? = null
+    private var historySource: String? = null
+    private var historyWindow = 0
+    private var historyAlarms = false
+    private var historyBusy = false
+    private var historyRequested = false
+    private var lastHistoryRefresh = 0L
+    private val exportCsv = registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        val data = csvPending; csvPending = ""
+        if (uri != null && model.user != null) authWorker.execute {
+            val result = runCatching { checkNotNull(contentResolver.openOutputStream(uri)).use { it.write(data.toByteArray(Charsets.UTF_8)) } }
+            runOnUiThread { if (!isDestroyed) message(if (result.isSuccess) "CSV exportado" else "No se pudo guardar el CSV") }
+        }
+    }
     private val export = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
         if (uri != null) runCatching { contentResolver.openOutputStream(uri)?.use { it.write(exportPending.toByteArray(Charsets.UTF_8)) } }
             .onSuccess { message("Bitácora exportada") }.onFailure { message("No se pudo guardar la bitácora") }
@@ -61,11 +85,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         model = ViewModelProvider(this)[AppModel::class.java]
         currentPage = savedInstanceState?.getInt("page") ?: R.id.nav_connection
+        historySource = savedInstanceState?.getString("historySource")
+        historyWindow = savedInstanceState?.getInt("historyWindow") ?: 0
+        historyAlarms = savedInstanceState?.getBoolean("historyAlarms") ?: false
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (model.user == null) loginPage() else appPage()
         model.changes.observe(this) { refresh() }
     }
-    override fun onSaveInstanceState(outState: Bundle) { outState.putInt("page", currentPage); super.onSaveInstanceState(outState) }
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt("page", currentPage); outState.putString("historySource", historySource)
+        outState.putInt("historyWindow", historyWindow); outState.putBoolean("historyAlarms", historyAlarms)
+        super.onSaveInstanceState(outState)
+    }
     override fun onUserInteraction() { super.onUserInteraction(); lastTouch = SystemClock.elapsedRealtime() }
     override fun onStop() {
         super.onStop()
@@ -101,7 +132,8 @@ class MainActivity : AppCompatActivity() {
     }
     private fun clearRefs() {
         temperature = null; reading = null; alarm = null; metrics = null; logs = null; plot = null; apply = null
-        commandStatus = null; hostCode = null; hostStart = null; roleGroup = null; allowSwitch = null
+        commandStatus = null; hostCode = null; hostStart = null; hostCopy = null; roleGroup = null; allowSwitch = null
+        historySummary = null; historyDetails = null; lastHistoryRefresh = 0L
     }
     private fun text(value: String, size: Int = 15, bold: Boolean = false) = TextView(this).apply {
         this.text = value; textSize = size.toFloat(); setTextColor(Color.rgb(19,40,58))
@@ -136,7 +168,7 @@ class MainActivity : AppCompatActivity() {
     private fun loginPage() {
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         base()
-        banner.text = "Acceso local protegido"
+        banner.text = "Acceso local protegido · SQLite"
         val initial = !model.auth.exists()
         val box = card(if (initial) "Crea tu cuenta" else "Iniciar sesión")
         box.addView(text(if (initial) "Configura una cuenta en cada teléfono. La contraseña permanece en este dispositivo." else "Ingresa tus credenciales para monitorear y controlar el equipo.",14))
@@ -173,6 +205,7 @@ class MainActivity : AppCompatActivity() {
         nav.menu.add(0,R.id.nav_monitor,1,"Monitoreo").setIcon(R.drawable.ic_monitor)
         nav.menu.add(0,R.id.nav_control,2,"Activador").setIcon(R.drawable.ic_control)
         nav.menu.add(0,R.id.nav_log,3,"Registro").setIcon(R.drawable.ic_log)
+        nav.menu.add(0,R.id.nav_history,4,"Historial").setIcon(R.drawable.ic_log)
         nav.selectedItemId = currentPage
         nav.setOnItemSelectedListener { item -> currentPage = item.itemId; appPage(); true }
         root.addView(nav)
@@ -181,6 +214,7 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_monitor -> monitorPage()
             R.id.nav_control -> controlPage()
             R.id.nav_log -> logPage()
+            R.id.nav_history -> historyPage()
         }
         refresh()
     }
@@ -204,17 +238,25 @@ class MainActivity : AppCompatActivity() {
             allowSwitch = allow; box.addView(allow)
             val code = input(box,"Código de emparejamiento",R.id.pairing,true,model.pairingCode)
             code.keyListener = null; hostCode = code
-            box.addView(text("Después de iniciar, revela el código con el icono del ojo y escríbelo en el operador. Compártelo solo con la persona autorizada. Cambia al detener el equipo.",12))
+            box.addView(text("El código FS2 incluye el secreto y la identidad del Equipo para validar TLS. Copia el código completo al operador autorizado por un medio de confianza; no lo publiques. Cambia al reiniciar el Equipo.",12))
             hostStart = button(box,"Iniciar equipo",R.id.start_host) { model.startHost(allow.isChecked); code.setText(model.pairingCode); refresh() }
+            hostCopy = button(box,"Copiar código privado") {
+                if (model.pairingCode.isNotBlank()) {
+                    val clip = ClipData.newPlainText("Emparejamiento privado", model.pairingCode)
+                    if (android.os.Build.VERSION.SDK_INT >= 33) clip.description.extras = android.os.PersistableBundle().apply { putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true) }
+                    (getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+                    message("Código copiado. Compártelo únicamente con el operador autorizado.")
+                }
+            }
             button(box,"Detener conexión") { model.stop(); appPage() }
         } else {
             val box = card("Conectar al equipo")
             val ip = input(box,"IP del equipo",R.id.host_ip,false,model.hostIp)
             ip.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
-            val code = input(box,"Código de 32 caracteres",R.id.pairing,true,model.pairingCode)
+            val code = input(box,"Código FS2 completo del Equipo",R.id.pairing,true,model.pairingCode)
             button(box,"Conectar",R.id.connect) { runCatching { model.connect(ip.text.toString().trim(),code.text.toString().trim()) }.onFailure { message(it.message ?: "Datos inválidos") } }
             button(box,"Desconectar") { model.stop(); appPage() }
-            box.addView(text("Si falla: verifica la IP, el código y que la red permita comunicación entre sus clientes. No requiere Internet.",12))
+            box.addView(text("Ambos teléfonos deben usar la versión 1.1. TLS valida el certificado con la identidad del código. Si falla, revisa la IP, el código completo, la hora y el aislamiento Wi-Fi. No requiere Internet.",12))
         }
         button(setup,"Cerrar sesión") { logout() }
     }
@@ -271,6 +313,84 @@ class MainActivity : AppCompatActivity() {
         logs = text("",12).apply { setTextIsSelectable(true) }; box.addView(logs)
         box.addView(text("La bitácora mantiene los últimos 200 eventos durante esta ejecución. Exporta antes de cerrar la app.",12))
     }
+    private fun historyFilter(limit: Int = 50): HistoryFilter {
+        val from = when (historyWindow) {
+            1 -> System.currentTimeMillis() - 15 * 60_000L
+            2 -> Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0) }.timeInMillis
+            else -> null
+        }
+        return HistoryFilter(historySource, from, null, historyAlarms, limit)
+    }
+    private fun historyCriteria() = Triple(historySource, historyWindow, historyAlarms)
+    private fun historyPage() {
+        val filters = card("Consultar datos guardados")
+        filters.addView(text("Las lecturas se guardan en SQLite y permanecen al cerrar la app. Puedes consultar el historial sin Wi-Fi ni Internet.",14))
+        val source = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
+        listOf(R.id.history_source_all to "Todos", R.id.history_source_local to "Locales", R.id.history_source_remote to "Remotos").forEach { (key, label) ->
+            source.addView(RadioButton(this).apply { id = key; text = label })
+        }
+        source.check(when (historySource) { "LOCAL" -> R.id.history_source_local; "REMOTO" -> R.id.history_source_remote; else -> R.id.history_source_all })
+        source.setOnCheckedChangeListener { _, key -> historySource = when (key) { R.id.history_source_local -> "LOCAL"; R.id.history_source_remote -> "REMOTO"; else -> null }; loadHistory() }
+        filters.addView(source)
+        val time = RadioGroup(this)
+        listOf(R.id.history_time_all to "Todo lo conservado", R.id.history_time_15 to "Últimos 15 minutos", R.id.history_time_today to "Hoy").forEach { (key, label) ->
+            time.addView(RadioButton(this).apply { id = key; text = label })
+        }
+        time.check(when (historyWindow) { 1 -> R.id.history_time_15; 2 -> R.id.history_time_today; else -> R.id.history_time_all })
+        time.setOnCheckedChangeListener { _, key -> historyWindow = when (key) { R.id.history_time_15 -> 1; R.id.history_time_today -> 2; else -> 0 }; loadHistory() }
+        filters.addView(time)
+        val alarmsOnly = SwitchMaterial(this).apply { id = R.id.history_alarm; text = "Solo lecturas con alarma"; isChecked = historyAlarms }
+        alarmsOnly.setOnCheckedChangeListener { _, enabled -> historyAlarms = enabled; loadHistory() }; filters.addView(alarmsOnly)
+        button(filters,"Consultar SQLite",R.id.history_refresh) { loadHistory() }
+        val csv = button(filters,"Exportar consulta a CSV",R.id.history_export) {
+            val filter = historyFilter(HistoryStore.MAX_RECORDS)
+            findViewById<MaterialButton>(R.id.history_export)?.isEnabled = false
+            authWorker.execute {
+                val result = runCatching { model.history.exportCsv(filter) }
+                runOnUiThread {
+                    if (!isDestroyed && model.user != null) {
+                        findViewById<MaterialButton>(R.id.history_export)?.isEnabled = true
+                        if (result.isSuccess) { csvPending = result.getOrThrow(); exportCsv.launch("FrioSeguro_historial_${System.currentTimeMillis()}.csv") }
+                        else message("No se pudo consultar SQLite; revisa el almacenamiento.")
+                    }
+                }
+            }
+        }
+        csv.contentDescription = "Exportar todas las lecturas que cumplen los filtros a CSV"
+        filters.addView(text("Se conservan las últimas 10.000 lecturas. La pantalla muestra hasta 50 resultados y se actualiza cada 5 s. El CSV incluye todas las coincidencias, con fechas UTC y temperatura en °C.",12))
+        val result = card("Historial de sensores")
+        historySummary = text("Consultando SQLite…",14,true).apply { id = R.id.history_summary }; result.addView(historySummary)
+        historyDetails = text("",13).apply { id = R.id.history_records; setTextIsSelectable(true) }; result.addView(historyDetails)
+        loadHistory()
+    }
+    private fun loadHistory() {
+        if (model.user == null || currentPage != R.id.nav_history) return
+        val target = historyDetails ?: return
+        if (historyBusy) { historyRequested = true; return }
+        historyBusy = true; historyRequested = false; lastHistoryRefresh = SystemClock.elapsedRealtime()
+        val criteria = historyCriteria(); val filter = historyFilter()
+        authWorker.execute {
+            val outcome = runCatching { model.history.query(filter) }
+            runOnUiThread {
+                historyBusy = false
+                if (isDestroyed || model.user == null || currentPage != R.id.nav_history) return@runOnUiThread
+                if (historyDetails === target && historyCriteria() == criteria) {
+                    if (outcome.isSuccess) {
+                        val data = outcome.getOrThrow()
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                        val date = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+                        target.text = data.records.joinToString("\n\n") { row ->
+                            val s = row.snapshot
+                            "${date.format(Date(row.capturedAt))} · ${row.source} · Muestra ${s.sample}\n" +
+                            String.format(Locale.getDefault(),"%.2f °C · %s · Consigna %.1f °C",s.temperature,s.mode,s.setpoint) +
+                            "\nCompresor ${if(s.compressor) "ON" else "OFF"} · Puerta ${if(s.doorOpen) "abierta" else "cerrada"} · ${if(s.alarm) "ALARMA" else "Normal"}"
+                        }.ifEmpty { "No hay lecturas para estos filtros. Inicia un Equipo o recibe datos como Operador y vuelve a consultar." }
+                    } else { historySummary?.text = "No se pudo consultar SQLite"; target.text = "Revisa almacenamiento y fecha del dispositivo. Los datos existentes se conservan." }
+                }
+                if (historyRequested || historyDetails !== target || historyCriteria() != criteria) loadHistory()
+            }
+        }
+    }
     private fun refresh() {
         if (!::banner.isInitialized || model.user == null) return
         if (SystemClock.elapsedRealtime() - lastTouch > 300_000) { logout(); return }
@@ -291,10 +411,12 @@ class MainActivity : AppCompatActivity() {
             else -> model.notice.ifBlank { "Control autorizado. Revisa y confirma la orden." }
         }
         hostStart?.isEnabled = !model.running; allowSwitch?.isEnabled = !model.running
+        hostCopy?.isEnabled = model.running && model.pairingCode.isNotBlank()
         roleGroup?.let { group -> for(i in 0 until group.childCount) group.getChildAt(i).isEnabled = !model.running }
         if(model.isHost) hostCode?.setText(model.pairingCode)
+        if(currentPage == R.id.nav_history && SystemClock.elapsedRealtime() - lastHistoryRefresh >= 5_000) loadHistory()
     }
     private fun logout() {
-        model.stop(); model.user = null; model.log("Sesión local cerrada"); currentPage = R.id.nav_connection; loginPage()
+        model.stop(); model.user = null; exportPending = ""; csvPending = ""; model.log("Sesión local cerrada"); currentPage = R.id.nav_connection; loginPage()
     }
 }

@@ -1,64 +1,49 @@
 package cl.nestor.frioseguro
 
 import android.content.Context
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Base64
 import cl.nestor.frioseguro.core.Crypto
 import org.json.JSONObject
-import java.security.KeyStore
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.GCMParameterSpec
 
+/** Autenticación sin Internet: cuenta y bloqueo persistentes en SQLite. */
 class AuthStore(context: Context) {
-    private val prefs = context.getSharedPreferences("auth_private", Context.MODE_PRIVATE)
-    private val alias = "frioseguro.credentials.v1"
-    fun exists() = prefs.contains("vault")
-    private fun key(): SecretKey {
-        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        (store.getKey(alias, null) as? SecretKey)?.let { return it }
-        return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").run {
-            init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256).build())
-            generateKey()
+    private val database = LocalDatabase.get(context)
+    private val cipher = DeviceVault("frioseguro.credentials.v1")
+    init {
+        // Actualización desde 1.0: conserva el sobre AES, la clave y el bloqueo vigente.
+        synchronized(LocalDatabase.authLock) {
+            val legacy = context.getSharedPreferences("auth_private", Context.MODE_PRIVATE)
+            val oldVault = legacy.getString("vault", null)
+            if (oldVault != null && database.account() == null) database.createAccount(oldVault, legacy.getInt("failures", 0), legacy.getLong("blocked_until", 0))
+            if (oldVault != null && database.account()?.vault == oldVault) legacy.edit().clear().commit()
         }
     }
+    fun exists() = database.account() != null
     private fun b64(bytes: ByteArray) = Base64.encodeToString(bytes, Base64.NO_WRAP)
     private fun decode(text: String) = Base64.decode(text, Base64.NO_WRAP)
-    fun create(user: String, password: CharArray) {
+    fun create(user: String, password: CharArray) = synchronized(LocalDatabase.authLock) {
         require(user.matches(Regex("[A-Za-z0-9._-]{3,32}"))) { "Usuario de 3 a 32 caracteres: letras, números, punto, guion o guion bajo." }
         require(password.size in 12..128 && password.any(Char::isLetter) && password.any(Char::isDigit)) { "Usa de 12 a 128 caracteres, con letras y números." }
         check(!exists()) { "Ya existe una cuenta en este dispositivo" }
-        val salt = Crypto.randomBytes(16)
-        val hash = Crypto.passwordHash(password, salt)
-        val plain = JSONObject().put("user", user).put("salt", b64(salt)).put("hash", b64(hash)).toString()
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, key())
-        val encrypted = cipher.doFinal(plain.toByteArray())
-        prefs.edit().putString("vault", b64(cipher.iv + encrypted)).apply()
-        hash.fill(0)
+        val salt = Crypto.randomBytes(16); val hash = Crypto.passwordHash(password, salt)
+        try {
+            val plain = JSONObject().put("user", user).put("salt", b64(salt)).put("hash", b64(hash)).toString().toByteArray(Charsets.UTF_8)
+            try { database.createAccount(b64(cipher.encrypt(plain))) } finally { plain.fill(0) }
+        } finally { hash.fill(0); salt.fill(0) }
     }
-    fun login(user: String, password: CharArray): String {
-        val now = System.currentTimeMillis()
-        require(now >= prefs.getLong("blocked_until", 0)) { "Demasiados intentos. Espera 30 segundos." }
-        val bytes = decode(prefs.getString("vault", null) ?: error("Primero crea una cuenta"))
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes.copyOfRange(0, 12)))
-        val data = JSONObject(cipher.doFinal(bytes.copyOfRange(12, bytes.size)).toString(Charsets.UTF_8))
-        val expected = decode(data.getString("hash"))
-        val actual = Crypto.passwordHash(password, decode(data.getString("salt")))
-        val valid = Crypto.equal(actual, expected) && user == data.getString("user")
-        actual.fill(0); expected.fill(0)
+    fun login(user: String, password: CharArray): String = synchronized(LocalDatabase.authLock) {
+        val row = database.account() ?: error("Primero crea una cuenta")
+        require(System.currentTimeMillis() >= row.blockedUntil) { "Demasiados intentos. Espera 30 segundos." }
+        val plain = cipher.decrypt(decode(row.vault))
+        val data = try { JSONObject(plain.toString(Charsets.UTF_8)) } finally { plain.fill(0) }
+        val expected = decode(data.getString("hash")); val salt = decode(data.getString("salt")); val actual = Crypto.passwordHash(password, salt)
+        val valid = try { Crypto.equal(actual, expected) && user == data.getString("user") }
+            finally { actual.fill(0); expected.fill(0); salt.fill(0) }
         if (!valid) {
-            val failures = prefs.getInt("failures", 0) + 1
-            val edit = prefs.edit().putInt("failures", if (failures >= 5) 0 else failures)
-            if (failures >= 5) edit.putLong("blocked_until", now + 30_000)
-            edit.apply(); error("Usuario o contraseña incorrectos")
+            val failures = row.failures + 1
+            database.authState(if (failures >= 5) 0 else failures, if (failures >= 5) System.currentTimeMillis() + 30_000 else 0L)
+            error("Usuario o contraseña incorrectos")
         }
-        prefs.edit().putInt("failures", 0).remove("blocked_until").apply()
-        return data.getString("user")
+        database.authState(0, 0L); data.getString("user")
     }
 }
