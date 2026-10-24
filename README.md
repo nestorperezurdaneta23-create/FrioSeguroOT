@@ -9,7 +9,7 @@ El teléfono **Equipo** produce temperatura, puerta y estado del compresor. El t
 ## Instalar y conectar dos teléfonos
 
 1. Instala `apk/FrioSeguroOT.apk` en ambos teléfonos con Android 8 o posterior. Ambos deben usar la versión 1.1.
-2. Si Android indica un conflicto de firma con una instalación anterior de demostración, exporta primero las evidencias de esa app y desinstálala antes de instalar esta. Desinstalar elimina sus datos locales. La migración de la cuenta 1.0 a SQLite funciona cuando Android permite actualizar conservando la misma firma y datos.
+2. Esta APK 1.1 tiene una firma de desarrollo distinta de la APK 1.0 distribuida antes. Si tienes instalada aquella versión, exporta primero sus evidencias y desinstálala antes de instalar esta; deberás crear la cuenta otra vez. Desinstalar elimina los datos locales. El código de migración a SQLite se aplica a compilaciones que conservan la misma firma y los datos.
 3. Conecta ambos teléfonos a la misma Wi-Fi WPA2/WPA3, sin aislamiento entre clientes. También sirve un hotspot de un tercer teléfono. Activa fecha y hora automáticas.
 4. Crea una cuenta local en cada dispositivo. Usuario de 3 a 32 caracteres; contraseña de 12 a 128 caracteres, con letras y números. No hay credenciales predeterminadas. Inicia sesión.
 5. En B selecciona **Equipo**, configura **Permitir control remoto** y pulsa **Iniciar equipo**. Espera el estado **Equipo listo · TLS obligatorio**.

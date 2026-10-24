@@ -2,8 +2,8 @@ FRIOSEGURO OT 1.1 | TI3042 UNIDAD 2 SUMATIVA
 Néstor Urdaneta | 24 de octubre de 2026
 
 1. Instala apk/FrioSeguroOT.apk en DOS teléfonos Android 8 o posterior.
-   Ambos deben usar 1.1. Si Android informa conflicto de firma con una app
-   de demostración anterior, exporta sus evidencias y desinstálala antes.
+   Ambos deben usar 1.1. La APK 1.1 tiene otra firma que la 1.0 anterior.
+   Si tienes la 1.0, exporta sus evidencias y desinstálala antes.
    Desinstalar elimina la cuenta y los datos de esa instalación.
 
 2. Crea una cuenta local en cada teléfono e inicia sesión. La cuenta y el
