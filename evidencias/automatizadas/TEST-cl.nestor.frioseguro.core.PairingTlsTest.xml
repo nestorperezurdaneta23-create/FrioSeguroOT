@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="cl.nestor.frioseguro.core.PairingTlsTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-25T19:32:44" hostname="910e114657d7" time="0.466">
+  <properties/>
+  <testcase name="missingOrUnexpectedChainsAreRejected" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.002"/>
+  <testcase name="changedIdentityIsRejected" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.0"/>
+  <testcase name="legacyAndMalformedCodesAreRejected" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.023"/>
+  <testcase name="pairingRoundTripPreservesSecretAndIdentity" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.006"/>
+  <testcase name="actualTlsHandshakeRejectsWrongPin" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.123"/>
+  <testcase name="encryptedProtocolWorksInsideTls12" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.159"/>
+  <testcase name="encryptedProtocolWorksInsideTls13" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.139"/>
+  <testcase name="expiredCertificateIsRejectedEvenWithMatchingPin" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.012"/>
+  <testcase name="matchingCertificateIsAccepted" classname="cl.nestor.frioseguro.core.PairingTlsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

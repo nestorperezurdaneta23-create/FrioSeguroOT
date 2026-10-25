@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="cl.nestor.frioseguro.core.SecureChannelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-14T03:43:44" hostname="26f90f4cb83d" time="0.92">
+<testsuite name="cl.nestor.frioseguro.core.SecureChannelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-25T19:32:44" hostname="910e114657d7" time="0.447">
   <properties/>
-  <testcase name="modifiedCiphertextIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.064"/>
-  <testcase name="thousandRoundTripsMeasureStability" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.21"/>
+  <testcase name="modifiedCiphertextIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.005"/>
+  <testcase name="thousandRoundTripsMeasureStability" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.205"/>
   <testcase name="ciphertextDoesNotContainTelemetryPlaintext" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.002"/>
   <testcase name="replayFrameIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.003"/>
-  <testcase name="newSessionProducesDifferentCiphertext" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.006"/>
-  <testcase name="encryptedBidirectionalExchangeOverRealSockets" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.003"/>
-  <testcase name="outboundOversizedMessageIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.004"/>
-  <testcase name="deviceAuthorizesReadOnly" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.003"/>
-  <testcase name="wrongPairingCodeIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.004"/>
-  <testcase name="passwordHashesUseSaltAndRejectWrongSecret" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.615"/>
-  <testcase name="malformedPairingCodeIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.001"/>
-  <testcase name="oversizedFrameIsRejectedBeforeAllocation" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.003"/>
-  <system-out><![CDATA[LOCAL_LOOPBACK_ONLY n=1000 correct=1000 median_us=116 p95_us=498 max_us=7351
+  <testcase name="newSessionProducesDifferentCiphertext" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.003"/>
+  <testcase name="encryptedBidirectionalExchangeOverRealSockets" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.002"/>
+  <testcase name="outboundOversizedMessageIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.002"/>
+  <testcase name="deviceAuthorizesReadOnly" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.001"/>
+  <testcase name="wrongPairingCodeIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.002"/>
+  <testcase name="passwordHashesUseSaltAndRejectWrongSecret" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.217"/>
+  <testcase name="malformedPairingCodeIsRejected" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.0"/>
+  <testcase name="oversizedFrameIsRejectedBeforeAllocation" classname="cl.nestor.frioseguro.core.SecureChannelTest" time="0.002"/>
+  <system-out><![CDATA[LOCAL_LOOPBACK_ONLY n=1000 correct=1000 median_us=173 p95_us=340 max_us=3329
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -1,0 +1,48 @@
+{
+  "build_success": true,
+  "build_date": "2026-10-25",
+  "timezone": "America/Santiago",
+  "version": "1.1",
+  "core_tests": 29,
+  "core_failures": 0,
+  "core_errors": 0,
+  "core_suites": [
+    {
+      "name": "cl.nestor.frioseguro.core.PlantTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T19:32:44",
+      "hostname": "910e114657d7",
+      "time": "0.008"
+    },
+    {
+      "name": "cl.nestor.frioseguro.core.PairingTlsTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T19:32:44",
+      "hostname": "910e114657d7",
+      "time": "0.466"
+    },
+    {
+      "name": "cl.nestor.frioseguro.core.SecureChannelTest",
+      "tests": "12",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-25T19:32:44",
+      "hostname": "910e114657d7",
+      "time": "0.447"
+    }
+  ],
+  "lint_errors": 0,
+  "lint_warnings": 30,
+  "apk_sha256": "390ebaddb59b4b31242869a73e1ff5a8a371941c59822dc0020765cf776ec6a6",
+  "source_base_commit": "a1a9b1e506f1e6f80885381fdde17fc8c4f15690",
+  "android_instrumentation_date": "2026-10-24",
+  "android_cases_approved": 12,
+  "android_rerun_2026_10_25": false
+}

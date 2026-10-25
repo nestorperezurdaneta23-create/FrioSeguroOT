@@ -1,12 +1,30 @@
-app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:41: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
-        prefs.edit().putString("vault", b64(cipher.iv + encrypted)).apply()
-        ~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:57: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
-            val edit = prefs.edit().putInt("failures", if (failures >= 5) 0 else failures)
-                       ~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:61: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
-        prefs.edit().putInt("failures", 0).remove("blocked_until").apply()
-        ~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:18: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+            if (oldVault != null && database.account()?.vault == oldVault) legacy.edit().clear().commit()
+                                                                                                 ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/TlsTransport.kt:58: Warning: Implementing a custom X509TrustManager is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android's default implementation. [CustomX509TrustManager]
+        val trust = object : X509TrustManager {
+                    ~~~~~~
+
+   Explanation for issues of type "CustomX509TrustManager":
+   This check looks for custom X509TrustManager implementations.
+
+   https://goo.gle/CustomX509TrustManager
+
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:18: Warning: Use the KTX extension function SharedPreferences.edit instead? [UseKtx]
+            if (oldVault != null && database.account()?.vault == oldVault) legacy.edit().clear().commit()
+                                                                           ~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/HistoryStore.kt:27: Warning: Use the KTX extension function SQLiteDatabase.transaction instead? [UseKtx]
+        db.beginTransaction()
+        ~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/HistoryStore.kt:49: Warning: Use the KTX extension function SQLiteDatabase.transaction instead? [UseKtx]
+        db.beginTransactionNonExclusive()
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    Explanation for issues of type "UseKtx":
    The Android KTX libraries decorates the Android platform SDK as well as
@@ -61,52 +79,79 @@ app/src/main/java/cl/nestor/frioseguro/AuthStore.kt:61: Warning: Use the KTX ext
    </lint>
    ```
 
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:139: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
-        banner.text = "Acceso local protegido"
-                       ~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:191: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:171: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        banner.text = "Acceso local protegido · SQLite"
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:225: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         val operator = RadioButton(this).apply { id = View.generateViewId(); text = "Operador · ver datos y enviar órdenes" }
                                                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:192: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:226: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         val host = RadioButton(this).apply { id = View.generateViewId(); text = "Equipo · simular sensor y actuador" }
                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:203: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:237: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
             val allow = SwitchMaterial(this).apply { text = "Permitir control remoto"; isChecked = true; isEnabled = !model.running }
                                                              ~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:232: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:274: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
             val door = SwitchMaterial(this).apply { text = "Puerta abierta"; isChecked = model.snapshot.doorOpen }
                                                             ~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:244: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:286: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         val auto = RadioButton(this).apply { id = View.generateViewId(); text = "Automático · control con histéresis" }
                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:245: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:287: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         val manual = RadioButton(this).apply { id = View.generateViewId(); text = "Manual · control del compresor" }
                                                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:249: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:291: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
         slider.addOnChangeListener { _, value, _ -> target.text = "Consigna $value °C" }; box.addView(slider)
                                                                   ~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:249: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:291: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         slider.addOnChangeListener { _, value, _ -> target.text = "Consigna $value °C" }; box.addView(slider)
                                                                    ~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:250: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:292: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         val compressor = SwitchMaterial(this).apply { text = "Compresor encendido en modo manual"; isChecked = model.snapshot.compressor; isEnabled = mode.checkedRadioButtonId == manual.id }
                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:342: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        val alarmsOnly = SwitchMaterial(this).apply { id = R.id.history_alarm; text = "Solo lecturas con alarma"; isChecked = historyAlarms }
+                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                                ~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                                                      ~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                                                                                   ~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                                                                                                   ~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:380: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                        historySummary?.text = "SQLite · ${data.total} guardadas · ${data.matching} coincidencias\nMostrando ${data.records.size} lecturas más recientes"
+                                                                                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:388: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                    } else { historySummary?.text = "No se pudo consultar SQLite"; target.text = "Revisa almacenamiento y fecha del dispositivo. Los datos existentes se conservan." }
+                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:388: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                    } else { historySummary?.text = "No se pudo consultar SQLite"; target.text = "Revisa almacenamiento y fecha del dispositivo. Los datos existentes se conservan." }
+                                                                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                          ~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                                                 ~~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                                                                        ~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                                                                                                                                 ~~~~~~~~~~~
-app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+/workspace/scratch/82f39f9871b2/project/FrioSeguroOT/app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:403: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
         reading?.text = "Consigna: ${s.setpoint} °C · Modo: ${s.mode}\nCompresor: ${if(s.compressor) "encendido" else "apagado"} · Puerta: ${if(s.doorOpen) "abierta" else "cerrada"}\nMuestra: ${s.sample} · ${if(fresh) "datos actuales" else "sin telemetría reciente"}"
                                                                                                                                                                                        ~~~~~~~~~
 
@@ -123,4 +168,4 @@ app/src/main/java/cl/nestor/frioseguro/MainActivity.kt:283: Warning: String lite
 
    https://developer.android.com/guide/topics/resources/localization.html
 
-0 errors, 19 warnings
+0 errors, 30 warnings

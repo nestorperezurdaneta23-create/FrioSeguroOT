@@ -1,22 +1,26 @@
-# Verificación automatizada
+# Verificación de FríoSeguro OT 1.1
 
-Fecha: 14 de octubre de 2026.
+Paquete final reconstruido el 25 de octubre de 2026 a partir del código corregido. No se ha cambiado la lógica Kotlin de la versión validada el 24 de octubre.
 
-- Compilación del APK: correcta con JDK 17, Gradle 8.11.1, AGP 8.9.2, Kotlin 2.1.10 y SDK 35.
-- Firma APK: verificada con apksigner. Firma de desarrollo Android Debug.
-- Núcleo JVM: 20 pruebas ejecutadas, 0 fallos y 0 errores.
-- Comunicación por sockets TCP en loopback del computador: 1000 respuestas correctas de 1000; mediana 116 microsegundos; p95 498 microsegundos; máximo 7351 microsegundos.
-- Android Lint: 0 errores, 19 advertencias de convenciones KTX y localización de textos de la app en español.
-- Distribución Gradle: SHA256 comprobado contra el archivo oficial; checksum fijado en el wrapper.
+## Comprobaciones del paquete final
 
-Los resultados XML y el informe Lint están en esta carpeta. Los ensayos del computador no son pruebas de Wi-Fi. Las pruebas instrumentadas Android y su alcance se registran en android/instrumentacion.txt. Las pruebas con dos teléfonos físicos deben completarse en Registro_pruebas_wifi.csv.
+- APK de la aplicación y APK de instrumentación compiladas correctamente con JDK 17, Gradle 8.11.1, AGP 8.9.2, Kotlin 2.1.10 y SDK 35.
+- 29 pruebas JVM aprobadas: 8 PlantTest, 12 SecureChannelTest y 9 PairingTlsTest; 0 fallos y 0 errores. XML originales de esta reconstrucción en esta carpeta.
+- PairingTlsTest establece TLS 1.2 y TLS 1.3 en loopback con SecureChannel y rechaza huellas incorrectas, certificados inválidos y códigos antiguos. No mide Wi-Fi.
+- Firma Android Debug verificada con apksigner; salida original en Firma_APK.txt. SHA256 del APK en apk/SHA256.txt y RESUMEN_BUILD.json. La nueva firma de demostración puede exigir reinstalar sobre APK anteriores.
+- Android Lint: 0 errores y 30 advertencias. Los textos de la app están en español; hay observaciones SetTextI18n, UseKtx, ApplySharedPref y CustomX509TrustManager. La confianza TLS propia verifica la huella y certificado recibido fuera de banda, no acepta certificados arbitrarios.
+- SHA256 de Gradle 8.11.1 contrastado con el checksum fijado en el wrapper. La CLI Android se verificó con SHA1 de los metadatos oficiales de Google y el JDK con su checksum oficial.
 
-Para reproducir: ./gradlew :app:assembleDebug :core:test :app:lintDebug. Para Android: ./gradlew :app:connectedDebugAndroidTest en un dispositivo de prueba. Las pruebas instrumentadas borran la cuenta local del dispositivo usado para probar.
+## Validación Android anterior
 
-## Android API 28
+El 24 de octubre aprobaron 12 casos distintos en Android API 28 emulado: 4 de cuenta, 5 de historial, 2 de TLS y 1 de integración. Se aprobaron además seed y verify en procesos separados. El primer lote detectó dos fallos; después de corregir la autorización de firma de la identidad TLS se repitieron los tres casos de TLS e integración y aprobaron.
 
-Tres pruebas de credenciales aprobadas: persistencia cifrada con Keystore, rechazo de contraseña débil y bloqueo después de cinco intentos fallidos. Los tres resultados están en android/instrumentacion_inicial.txt.
+El detalle y los límites están en android/RESUMEN_ANDROID_2026-10-24.md. Se presenta como resumen de resultados observados, no como un log original reconstruido. Los archivos temporales y seis capturas de 1.1 se perdieron antes de publicarse; no se incluyen. No se repitió la instrumentación Android el 25 de octubre.
 
-La prueba final de integración local aprobó login, recepción de telemetría, alarma, orden MANUAL con ACK y fallback AUTO con consigna 4 °C. Su registro es android/instrumentacion.txt. Usa dos modelos de app dentro del mismo emulador. El login y la navegación se activan mediante eventos programáticos de vistas Android; la orden se comprueba en el modelo y en el par receptor. Las cuatro imágenes se renderizaron desde las vistas Android con datos del ensayo. No son fotografías de dos teléfonos ni acreditan gestos táctiles.
+Los logs instrumentacion.txt, instrumentacion_inicial.txt e instrumentacion_foco.txt y las cuatro imágenes de android/qa pertenecen a 1.0. Son antecedentes, no evidencias de SQLite/TLS de 1.1.
 
-Los intentos iniciales de interfaz encontraron falta de foco en el display del emulador, antes de ingresar las credenciales. Se conservan instrumentacion_inicial.txt e instrumentacion_foco.txt. La prueba final evita depender del foco global y verifica los eventos de vistas y el contrato de comunicación. El acceso táctil y la Wi-Fi física deben verificarse con el protocolo de dos teléfonos.
+## Alcance y reproducción
+
+Los ensayos JVM y un emulador no acreditan dos teléfonos ni Wi-Fi física. T01 a T23 de docs/PRUEBAS_DISPOSITIVOS.md y evidencias/Registro_pruebas_wifi.csv siguen PENDIENTE hasta ejecutarlos realmente. La aprobación del docente también debe obtenerse.
+
+Compilar y revisar: ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest :core:test :app:lintDebug. En un Android de prueba ejecutar AccountSecurityTest, HistoryStorageTest, TlsTransportTest y UiIntegrationTest. Ejecutar RestartPersistenceTest#seed y #verify en instrumentaciones separadas con am force-stop entre ambas; ver README.md. Estos tests preparan o borran la cuenta y lecturas del dispositivo de prueba.
