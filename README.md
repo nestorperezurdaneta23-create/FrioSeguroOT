@@ -2,14 +2,14 @@
 
 Aplicación Android en Kotlin para monitorear y controlar una cámara de refrigeración simulada desde dos teléfonos conectados por Wi-Fi. Proyecto individual de Néstor Urdaneta para TI3042, Unidad 2, evaluación sumativa.
 
-**Versión 1.1, actualizada el 24 de octubre de 2026.** Incluye autenticación SQLite, historial persistente y consultable, exportación CSV y transporte TLS con identidad del Equipo verificada. El repositorio público es [https://github.com/nestorperezurdaneta23-create/FrioSeguroOT](https://github.com/nestorperezurdaneta23-create/FrioSeguroOT).
+**Versión 1.1, paquete final actualizado el 25 de octubre de 2026.** Incluye autenticación SQLite, historial persistente y consultable, exportación CSV y transporte TLS con identidad del Equipo verificada. El repositorio público es [https://github.com/nestorperezurdaneta23-create/FrioSeguroOT](https://github.com/nestorperezurdaneta23-create/FrioSeguroOT).
 
 El teléfono **Equipo** produce temperatura, puerta y estado del compresor. El teléfono **Operador** recibe datos, muestra alertas y envía órdenes con ACK. Los sensores y el actuador son simulados. Los rangos son didácticos.
 
 ## Instalar y conectar dos teléfonos
 
 1. Instala `apk/FrioSeguroOT.apk` en ambos teléfonos con Android 8 o posterior. Ambos deben usar la versión 1.1.
-2. Esta APK 1.1 tiene una firma de desarrollo distinta de la APK 1.0 distribuida antes. Si tienes instalada aquella versión, exporta primero sus evidencias y desinstálala antes de instalar esta; deberás crear la cuenta otra vez. Desinstalar elimina los datos locales. El código de migración a SQLite se aplica a compilaciones que conservan la misma firma y los datos.
+2. La APK final fue firmada de nuevo. Si tienes instalada una APK de demostración anterior (1.0 o la 1.1 preliminar) y Android rechaza la actualización por firma distinta, exporta primero sus evidencias y desinstálala antes de instalar esta; deberás crear la cuenta otra vez. Desinstalar elimina los datos locales. El código de migración a SQLite se aplica a compilaciones que conservan la misma firma y los datos.
 3. Conecta ambos teléfonos a la misma Wi-Fi WPA2/WPA3, sin aislamiento entre clientes. También sirve un hotspot de un tercer teléfono. Activa fecha y hora automáticas.
 4. Crea una cuenta local en cada dispositivo. Usuario de 3 a 32 caracteres; contraseña de 12 a 128 caracteres, con letras y números. No hay credenciales predeterminadas. Inicia sesión.
 5. En B selecciona **Equipo**, configura **Permitir control remoto** y pulsa **Iniciar equipo**. Espera el estado **Equipo listo · TLS obligatorio**.
