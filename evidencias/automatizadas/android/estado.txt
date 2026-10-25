@@ -1,1 +1,4 @@
-Ejecutado en un emulador Android API 28. No es prueba inalámbrica en dos teléfonos físicos.
+Paquete final 1.1 reconstruido el 25 de octubre de 2026.
+Validación Android previa: 24 de octubre de 2026, 12 casos aprobados en dos lotes y dos etapas de persistencia entre procesos.
+Los logs y cuatro imágenes anteriores de esta carpeta corresponden a 1.0. Ver RESUMEN_ANDROID_2026-10-24.md para el alcance de 1.1.
+Pruebas físicas Wi-Fi y validación docente pendientes.
